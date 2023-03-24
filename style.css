@@ -1,0 +1,22 @@
+#search-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 50px;
+    margin-bottom: 50px;
+}
+
+#photos-container {
+    background-color: pink;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.upload-area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: lightgrey; 
+    height: 100px;
+}
