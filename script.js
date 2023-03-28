@@ -1,12 +1,12 @@
 var apigClient = apigClientFactory.newClient({
-    apiKey: 'rFnuulRbsBfCc8Jf6xuCaxXfx12S7ZMaJ4RR6Lw0'
+    apiKey: '2JqhvPnkr13r8iTVtME8J1XpSw88eJhP49oc7yjP'
 });
 
 function showResults() {
-    alert(document.getElementById('search').value);
 
     // Make search requests to the GET /search endpoint
     var search_input = document.getElementById('search').value.trim().toLowerCase();
+    document.getElementById('search').value = "";
     if (search_input == '') {
         alert("Please enter a search query.");
     }
@@ -14,7 +14,7 @@ function showResults() {
         console.log("Searching the photo album...");
 
         var params = {
-            'x-api-key' : 'rFnuulRbsBfCc8Jf6xuCaxXfx12S7ZMaJ4RR6Lw0',
+            'x-api-key' : '2JqhvPnkr13r8iTVtME8J1XpSw88eJhP49oc7yjP',
             'q' : search_input
         };
 
@@ -24,16 +24,27 @@ function showResults() {
 
                 console.log("Successful GET API Response: ", result);
 
-                /*images = result["data"]["body"]["images"];
-                console.log("Image Paths: ", images);
-
                 var photo_output_area = document.getElementById("photos-container");
-                photo_output_area.innerHTML = "";
+                photo_output_area.innerHTML = ""; // clear photo area
 
-                for (var i = 0; i < images.length; i++) {
-                    path_breakdown = images[i].split('/');
-                    photo_output_area.innerHTML += '<figure><img src="' + path_breakdown[i] + '" style="width:80px;"></figure>';
-                }*/
+                for (const url of result["data"]["body"]["images"]) {
+
+                    image = url.replace(/^"(.*)"$/, '$1'); 
+                    console.log("lambda response: ", image);
+
+                    // base64 image from S3 bucket -> frontend
+                    fetch(image)
+                        .then(response => response.blob())
+                        .then(blob => {
+                            var reader = new FileReader();
+                            reader.readAsBinaryString(blob);
+                            reader.onloadend = () => {
+                            var base64Data = reader.result;
+
+                            photo_output_area.innerHTML += '<figure><img src="data:image/*;base64, ' + base64Data + '"style="height: 250px;"></figure>';
+                            };
+                        });
+                }
 
             }).catch(function(result) {
                 console.log("Failed GET API Response: ", result);
@@ -42,34 +53,40 @@ function showResults() {
 }
 
 function uploadImage() {
+
     // image & custom label information
     var image_path = document.getElementById('filetoupload').value
     var filename = image_path.split("\\").pop();
     var file = document.getElementById('filetoupload').files[0]
-    //alert(image_path)
-    //alert(filename)
 
     var custom_labels = document.getElementById('file-custom-labels').value
-    //alert(custom_labels)
 
     if (image_path == '' || ![".png", ".jpg", ".jpeg"].some(ext => filename.includes(ext))) {
         alert("Please upload an image file of the type .png, .jpg, or .jpeg.");
     }
     else {
+        document.getElementById('filetoupload').value = "";
+        document.getElementById('file-custom-labels').value = "";
+
         console.log('Image file: ', file);
         console.log("Uploading the image...");
 
         var params = {
-            'x-api-key' : 'rFnuulRbsBfCc8Jf6xuCaxXfx12S7ZMaJ4RR6Lw0',
-            'Content-Type': file.type,
+            'x-api-key' : '2JqhvPnkr13r8iTVtME8J1XpSw88eJhP49oc7yjP',
+            'x-amz-meta-customLabels': custom_labels.replace(/\s/g, '').trim(),
+            "filename" : filename, 
+            "bucket" : "photo-album-application.com", 
+            "Content-Type" : file.type,
+            "Accept": '*/*',
             'Access-Control-Allow-Origin': '*'
         };
 
-        /*var reader = new FileReader();
+        var reader = new FileReader();
         reader.onload = function (event) {
-            body = btoa(event.target.result);
-            //console.log('Reader body : ', body);
-            return apigClient.uploadPut(params, {}, {})
+            const binary_string = event.target.result.replace(/\\([0-7]{3})/g, (match, octal) => String.fromCharCode(parseInt(octal, 8)));
+            body = btoa(binary_string); // binary
+
+            return apigClient.uploadBucketFilenamePut(params, body)
             .then(function(result) {
                 console.log("Successful PUT response: ", result);
             })
@@ -77,6 +94,6 @@ function uploadImage() {
                 console.log("Failed PUT response: ", error);
             })
         }
-        reader.readAsBinaryString(file);*/
+        reader.readAsBinaryString(file);
     }
 }

@@ -7,10 +7,9 @@
 }
 
 #photos-container {
-    background-color: pink;
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    align-items: center;
 }
 
 .upload-area {
