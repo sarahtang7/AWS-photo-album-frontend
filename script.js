@@ -2,11 +2,6 @@ var apigClient = apigClientFactory.newClient({
     apiKey: '2JqhvPnkr13r8iTVtME8J1XpSw88eJhP49oc7yjP'
 });
 
-// voice to text
-//const SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
-//const SpeechGrammarList = window.SpeechGrammarList || webkitSpeechGrammarList;
-//const SpeechRecognitionEvent = window.SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
-
 function showResults() {
 
     // Make search requests to the GET /search endpoint
@@ -34,21 +29,11 @@ function showResults() {
 
                 for (const url of result["data"]["body"]["images"]) {
 
-                    image = url.replace(/^"(.*)"$/, '$1'); 
+                    image = url.replace(/^"(.*)"$/, '$1'); // maybe take out
                     console.log("lambda response: ", image);
 
-                    // base64 image from S3 bucket -> frontend
-                    fetch(image)
-                        .then(response => response.blob())
-                        .then(blob => {
-                            var reader = new FileReader();
-                            reader.readAsBinaryString(blob);
-                            reader.onloadend = () => {
-                            var base64Data = reader.result;
+                    photo_output_area.innerHTML += '<figure><img src="' + image + '" style="height: 250px;"></figure>';
 
-                            photo_output_area.innerHTML += '<figure><img src="data:image/*;base64, ' + base64Data + '"style="height: 250px;"></figure>';
-                            };
-                        });
                 }
 
             }).catch(function(result) {
@@ -112,15 +97,15 @@ function uploadImage() {
             'x-amz-meta-customLabels': custom_labels.replace(/\s/g, '').trim(),
             "filename" : filename, 
             "bucket" : "photo-album-application.com", 
-            "Content-Type" : file.type,
-            "Accept": '*/*',
+            "Content-Type" : 'application/base64',
+            "Accept": 'application/base64',
             'Access-Control-Allow-Origin': '*'
         };
 
         var reader = new FileReader();
         reader.onload = function (event) {
             const binary_string = event.target.result.replace(/\\([0-7]{3})/g, (match, octal) => String.fromCharCode(parseInt(octal, 8)));
-            body = btoa(binary_string); // binary
+            body = btoa(binary_string); // base64-encoded string
 
             return apigClient.uploadBucketFilenamePut(params, body)
             .then(function(result) {
