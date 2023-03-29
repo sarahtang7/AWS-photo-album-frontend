@@ -2,6 +2,11 @@ var apigClient = apigClientFactory.newClient({
     apiKey: '2JqhvPnkr13r8iTVtME8J1XpSw88eJhP49oc7yjP'
 });
 
+// voice to text
+//const SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+//const SpeechGrammarList = window.SpeechGrammarList || webkitSpeechGrammarList;
+//const SpeechRecognitionEvent = window.SpeechRecognitionEvent || webkitSpeechRecognitionEvent;
+
 function showResults() {
 
     // Make search requests to the GET /search endpoint
@@ -50,6 +55,37 @@ function showResults() {
                 console.log("Failed GET API Response: ", result);
             });
     }
+}
+
+function processVoiceInput() {
+    console.log("Processing voice input ...");
+
+    var speech = true;
+    const search_bar = document.getElementById("search");
+
+    window.SpeechRecognition = window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    recognition.interimResults = true;
+
+    if (speech == true) {
+        recognition.start();
+    }
+
+    recognition.addEventListener('result', event => {
+        console.log("Converting voice to text...");
+
+        const idx = event.resultIndex;
+        const transcript = event.results[idx][0].transcript;
+
+        search_bar.value = transcript;
+    })
+
+    recognition.addEventListener("end", function() {
+        console.log("Done recording");
+        speech = false;
+        recognition.stop();
+    });
+    
 }
 
 function uploadImage() {

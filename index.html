@@ -5,6 +5,7 @@
 
     <title>Photo Album Search</title>
     <link rel="stylesheet" type="text/css" href="./style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
 
     <script type="text/javascript" src="lib/axios/dist/axios.standalone.js"></script>
     <script type="text/javascript" src="lib/CryptoJS/rollups/hmac-sha256.js"></script>
@@ -28,8 +29,8 @@
     <div id="search-container">
         <form action="", method="get", id="search-bar">
           <input type="text" placeholder="Search for Image" name="search" id="search" style="width: 600px;">
-          <!--microphone button will go here-->
         </form>
+        <button id="mic" style="margin-right: 3px; margin-left: 3px;" onclick="processVoiceInput()"><i class="fa fa-microphone"></i></button>
 
         <button type="button" id="submit-search" onclick="showResults()">Search</button>
     </div>
